@@ -33,7 +33,7 @@ from app.schemas.research import (
     ResearchProjectRead,
     ResearchProjectUpdate,
 )
-from app.services.research import create_blog_post, create_research_project
+from app.services.research import create_blog_post, create_research_project, prepare_blog_post_update
 
 router = APIRouter()
 
@@ -93,19 +93,44 @@ async def delete_project(
 async def create_post(
     payload: BlogPostCreate,
     session: AsyncSession = Depends(get_db_session),
-    _: CurrentUser = Depends(require_research_user),
+    current_user: CurrentUser = Depends(require_research_user),
 ):
-    return await create_blog_post(session, payload)
+    return await create_blog_post(session, payload, current_user)
 
 
 @router.get("/blog-posts", response_model=list[BlogPostRead])
 async def list_posts(limit: int = Query(50, ge=1, le=100), offset: int = Query(0, ge=0), session: AsyncSession = Depends(get_db_session)):
-    return await blog_post_repo.list(session, limit, offset)
+    return await blog_post_repo.list_public(session, limit, offset)
+
+
+@router.get("/blog-posts/mine", response_model=list[BlogPostRead])
+async def list_my_posts(
+    limit: int = Query(100, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+    session: AsyncSession = Depends(get_db_session),
+    current_user: CurrentUser = Depends(require_research_user),
+):
+    return await blog_post_repo.list_for_author(session, current_user.id, limit, offset)
+
+
+@router.get("/blog-posts/mine/{post_id}", response_model=BlogPostRead)
+async def get_my_post(
+    post_id: uuid.UUID,
+    session: AsyncSession = Depends(get_db_session),
+    current_user: CurrentUser = Depends(require_research_user),
+):
+    post = await blog_post_repo.get_for_author(session, post_id, current_user.id)
+    if post is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return post
 
 
 @router.get("/blog-posts/{post_id}", response_model=BlogPostRead)
 async def get_post(post_id: uuid.UUID, session: AsyncSession = Depends(get_db_session)):
-    return await get_or_404(blog_post_repo, session, post_id)
+    post = await blog_post_repo.get_public(session, post_id)
+    if post is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return post
 
 
 @router.patch("/blog-posts/{post_id}", response_model=BlogPostRead)
@@ -113,19 +138,55 @@ async def update_post(
     post_id: uuid.UUID,
     payload: BlogPostUpdate,
     session: AsyncSession = Depends(get_db_session),
-    _: CurrentUser = Depends(require_research_user),
+    current_user: CurrentUser = Depends(require_research_user),
 ):
-    item = await get_or_404(blog_post_repo, session, post_id)
-    return await blog_post_repo.update(session, item, payload.model_dump(exclude_unset=True))
+    item = await blog_post_repo.get_for_author(session, post_id, current_user.id)
+    if item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return await blog_post_repo.update(session, item, prepare_blog_post_update(payload, item))
+
+
+@router.post("/blog-posts/{post_id}/publish", response_model=BlogPostRead)
+async def publish_post(
+    post_id: uuid.UUID,
+    session: AsyncSession = Depends(get_db_session),
+    current_user: CurrentUser = Depends(require_research_user),
+):
+    item = await blog_post_repo.get_for_author(session, post_id, current_user.id)
+    if item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return await blog_post_repo.update(
+        session,
+        item,
+        prepare_blog_post_update(
+            BlogPostUpdate(status="published", visibility="public"),
+            item,
+        ),
+    )
+
+
+@router.post("/blog-posts/{post_id}/visibility", response_model=BlogPostRead)
+async def set_post_visibility(
+    post_id: uuid.UUID,
+    payload: BlogPostUpdate,
+    session: AsyncSession = Depends(get_db_session),
+    current_user: CurrentUser = Depends(require_research_user),
+):
+    item = await blog_post_repo.get_for_author(session, post_id, current_user.id)
+    if item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return await blog_post_repo.update(session, item, prepare_blog_post_update(payload, item))
 
 
 @router.delete("/blog-posts/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_post(
     post_id: uuid.UUID,
     session: AsyncSession = Depends(get_db_session),
-    _: CurrentUser = Depends(require_research_user),
+    current_user: CurrentUser = Depends(require_research_user),
 ):
-    item = await get_or_404(blog_post_repo, session, post_id)
+    item = await blog_post_repo.get_for_author(session, post_id, current_user.id)
+    if item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
     await blog_post_repo.delete(session, item)
 
 

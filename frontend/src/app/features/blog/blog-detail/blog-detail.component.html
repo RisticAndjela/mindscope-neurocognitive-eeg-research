@@ -1,11 +1,24 @@
 <section class="page post-page">
-  <a routerLink="/blog" class="back-link">← Back to blog</a>
+  <a routerLink="/blog" class="back-link">Back to blog</a>
 
   @if (post$ | async; as post) {
     <article class="glass-card post">
-      <span class="badge">{{ post.status }}</span>
+      <div class="meta-strip">
+        <span class="badge">{{ post.status }}</span>
+        <span class="badge secondary">{{ post.visibility }}</span>
+      </div>
       <h1>{{ post.title }}</h1>
-      <p class="meta">{{ post.created_at | date:'medium' }}</p>
+      <p class="meta">{{ (post.published_at || post.created_at) | date:'medium' }}</p>
+      @if (post.excerpt) {
+        <p class="excerpt">{{ post.excerpt }}</p>
+      }
+      @if (post.tags.length) {
+        <div class="tag-row">
+          @for (tag of post.tags; track tag) {
+            <span>{{ tag }}</span>
+          }
+        </div>
+      }
       <pre>{{ post.content_markdown }}</pre>
     </article>
   }

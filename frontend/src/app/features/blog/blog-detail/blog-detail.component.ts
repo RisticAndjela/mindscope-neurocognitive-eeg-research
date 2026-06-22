@@ -16,6 +16,6 @@ export class BlogDetailComponent {
   private readonly api = inject(ApiService);
 
   readonly post$ = this.route.paramMap.pipe(
-    switchMap(params => this.api.getBlogPost(params.get('id') ?? ''))
+    switchMap((params) => this.api.getPublicBlogPost(params.get('id') ?? ''))
   );
 }

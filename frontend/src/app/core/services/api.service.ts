@@ -1,39 +1,78 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-
-export type ResearchProject = {
-  id: string;
-  title: string;
-  slug: string;
-  summary?: string | null;
-  research_question?: string | null;
-  status: 'planned' | 'active' | 'paused' | 'completed';
-  tags: string[];
-  created_at: string;
-  updated_at: string;
-};
-
-export type BlogPost = {
-  id: string;
-  project_id?: string | null;
-  title: string;
-  slug: string;
-  excerpt?: string | null;
-  content_markdown: string;
-  status: 'draft' | 'published' | 'archived';
-  tags: string[];
-  created_at: string;
-  updated_at: string;
-};
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { Observable, defer, from, switchMap, throwError } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { BlogPost, BlogPostCreate, BlogPostUpdate, ResearchProject } from '../types/blog';
+import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private readonly baseUrl = 'http://127.0.0.1:8000/api/v1/research';
+  private readonly http = inject(HttpClient);
+  private readonly authService = inject(AuthService);
+  private readonly baseUrl = `${environment.backendApiBaseUrl}/research`;
 
-  constructor(private readonly http: HttpClient) {}
+  getProjects() {
+    return this.http.get<ResearchProject[]>(`${this.baseUrl}/projects`);
+  }
 
-  getProjects() { return this.http.get<ResearchProject[]>(`${this.baseUrl}/projects`); }
-  getProject(id: string) { return this.http.get<ResearchProject>(`${this.baseUrl}/projects/${id}`); }
-  getBlogPosts() { return this.http.get<BlogPost[]>(`${this.baseUrl}/blog-posts`); }
-  getBlogPost(id: string) { return this.http.get<BlogPost>(`${this.baseUrl}/blog-posts/${id}`); }
+  getProject(id: string) {
+    return this.http.get<ResearchProject>(`${this.baseUrl}/projects/${id}`);
+  }
+
+  listPublicBlogPosts() {
+    return this.http.get<BlogPost[]>(`${this.baseUrl}/blog-posts`);
+  }
+
+  getPublicBlogPost(id: string) {
+    return this.http.get<BlogPost>(`${this.baseUrl}/blog-posts/${id}`);
+  }
+
+  listMyBlogPosts() {
+    return this.withAuth((headers) => this.http.get<BlogPost[]>(`${this.baseUrl}/blog-posts/mine`, { headers }));
+  }
+
+  getMyBlogPost(id: string) {
+    return this.withAuth((headers) => this.http.get<BlogPost>(`${this.baseUrl}/blog-posts/mine/${id}`, { headers }));
+  }
+
+  createBlogPost(payload: BlogPostCreate) {
+    return this.withAuth((headers) => this.http.post<BlogPost>(`${this.baseUrl}/blog-posts`, payload, { headers }));
+  }
+
+  updateBlogPost(id: string, payload: BlogPostUpdate) {
+    return this.withAuth((headers) => this.http.patch<BlogPost>(`${this.baseUrl}/blog-posts/${id}`, payload, { headers }));
+  }
+
+  publishBlogPost(id: string) {
+    return this.withAuth((headers) => this.http.post<BlogPost>(`${this.baseUrl}/blog-posts/${id}/publish`, {}, { headers }));
+  }
+
+  setBlogPostVisibility(id: string, visibility: 'public' | 'private') {
+    return this.withAuth((headers) =>
+      this.http.post<BlogPost>(`${this.baseUrl}/blog-posts/${id}/visibility`, { visibility }, { headers })
+    );
+  }
+
+  archiveBlogPost(id: string) {
+    return this.updateBlogPost(id, { status: 'archived' });
+  }
+
+  deleteBlogPost(id: string) {
+    return this.withAuth((headers) => this.http.delete<void>(`${this.baseUrl}/blog-posts/${id}`, { headers }));
+  }
+
+  private withAuth<T>(factory: (headers: HttpHeaders) => Observable<T>) {
+    return defer(() =>
+      from(this.authService.getAccessToken()).pipe(
+        switchMap((token) => {
+          if (!token) {
+            return throwError(() => new Error('You must be logged in to manage research posts.'));
+          }
+
+          return from([factory(new HttpHeaders({ Authorization: `Bearer ${token}` }))]);
+        }),
+        switchMap((request) => request)
+      )
+    );
+  }
 }

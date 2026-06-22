@@ -1,0 +1,134 @@
+<section class="page research-blog-page">
+  @if (!isResearcher()) {
+    <ms-research-forbidden-state />
+  } @else {
+    <header class="workspace-hero glass-card">
+      <div>
+        <span class="badge">Research writing workspace</span>
+        <h1>Lab notebook publishing</h1>
+        <p>
+          Draft privately, publish publicly, and keep a clean trail of notes, excerpts, and Markdown experiments
+          inside the MindScope research stack.
+        </p>
+      </div>
+      <div class="hero-actions">
+        <a routerLink="/research/blog/new" class="primary-button">Start a research note</a>
+        <a routerLink="/blog" class="secondary-button">Open public journal</a>
+      </div>
+    </header>
+
+    <section class="workspace-stats">
+      <div class="stat-card glass-card">
+        <span>Total notes</span>
+        <strong>{{ totalCount() }}</strong>
+      </div>
+      <div class="stat-card glass-card">
+        <span>Drafts</span>
+        <strong>{{ grouped().drafts.length }}</strong>
+      </div>
+      <div class="stat-card glass-card">
+        <span>Private</span>
+        <strong>{{ grouped().privatePosts.length }}</strong>
+      </div>
+      <div class="stat-card glass-card">
+        <span>Public</span>
+        <strong>{{ grouped().published.length }}</strong>
+      </div>
+    </section>
+
+    @if (loading()) {
+      <div class="empty-state glass-card">
+        <h2>Loading your notebook...</h2>
+        <p>Indexing drafts, publication state, and project links.</p>
+      </div>
+    } @else if (errorMessage()) {
+      <div class="empty-state glass-card">
+        <h2>Workspace unavailable</h2>
+        <p>{{ errorMessage() }}</p>
+      </div>
+    } @else if (!posts().length) {
+      <div class="empty-state glass-card">
+        <h2>No drafts yet — start a research note.</h2>
+        <p>Your private notebook is empty. Open a new entry and begin shaping an experiment log, reflection, or essay.</p>
+      </div>
+    } @else {
+      <section class="group">
+        <div class="group-heading">
+          <h2>Drafts</h2>
+          <span>{{ grouped().drafts.length }}</span>
+        </div>
+        <div class="post-grid">
+          @for (post of grouped().drafts; track trackById($index, post)) {
+            <a [routerLink]="['/research/blog', post.id, 'edit']" class="workspace-card glass-card draft">
+              <div class="card-top">
+                <span class="pill draft">{{ post.status }}</span>
+                <span class="timestamp">{{ post.updated_at | date:'short' }}</span>
+              </div>
+              <h3>{{ post.title }}</h3>
+              <p>{{ post.excerpt || 'No excerpt yet. Start mapping the cognitive signal.' }}</p>
+            </a>
+          }
+        </div>
+      </section>
+
+      <section class="group">
+        <div class="group-heading">
+          <h2>Private publications</h2>
+          <span>{{ grouped().privatePosts.length }}</span>
+        </div>
+        <div class="post-grid">
+          @for (post of grouped().privatePosts; track trackById($index, post)) {
+            <a [routerLink]="['/research/blog', post.id, 'edit']" class="workspace-card glass-card private">
+              <div class="card-top">
+                <span class="pill private">{{ post.visibility }}</span>
+                <span class="timestamp">{{ post.updated_at | date:'short' }}</span>
+              </div>
+              <h3>{{ post.title }}</h3>
+              <p>{{ post.excerpt || 'Visible only in the research workspace.' }}</p>
+            </a>
+          }
+        </div>
+      </section>
+
+      <section class="group">
+        <div class="group-heading">
+          <h2>Public publications</h2>
+          <span>{{ grouped().published.length }}</span>
+        </div>
+        <div class="post-grid">
+          @for (post of grouped().published; track trackById($index, post)) {
+            <a [routerLink]="['/research/blog', post.id, 'edit']" class="workspace-card glass-card published">
+              <div class="card-top">
+                <span class="pill public">public</span>
+                <span class="timestamp">{{ (post.published_at || post.updated_at) | date:'short' }}</span>
+              </div>
+              <h3>{{ post.title }}</h3>
+              <p>{{ post.excerpt || 'Live on the public journal.' }}</p>
+            </a>
+          }
+        </div>
+      </section>
+
+      @if (grouped().archived.length) {
+        <section class="group">
+          <div class="group-heading">
+            <h2>Archived</h2>
+            <span>{{ grouped().archived.length }}</span>
+          </div>
+          <div class="post-grid">
+            @for (post of grouped().archived; track trackById($index, post)) {
+              <a [routerLink]="['/research/blog', post.id, 'edit']" class="workspace-card glass-card archived">
+                <div class="card-top">
+                  <span class="pill archived">{{ post.status }}</span>
+                  <span class="timestamp">{{ post.updated_at | date:'short' }}</span>
+                </div>
+                <h3>{{ post.title }}</h3>
+                <p>{{ post.excerpt || 'Stored for later reference.' }}</p>
+              </a>
+            }
+          </div>
+        </section>
+      }
+    }
+  }
+</section>

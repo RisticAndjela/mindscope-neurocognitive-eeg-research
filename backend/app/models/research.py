@@ -1,11 +1,12 @@
 import uuid
+from datetime import datetime
 
-from sqlalchemy import Enum, ForeignKey, String, Text
+from sqlalchemy import DateTime, Enum, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
-from app.models.enums import DatasetStatus, ExperimentStatus, PublicationStatus, ResearchStatus, TaskType
+from app.models.enums import BlogVisibility, DatasetStatus, ExperimentStatus, PublicationStatus, ResearchStatus, TaskType
 
 
 class ResearchProject(Base, UUIDPrimaryKeyMixin, TimestampMixin):
@@ -31,6 +32,12 @@ class ResearchProject(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 class BlogPost(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "blog_posts"
 
+    author_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
     project_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("research_projects.id", ondelete="SET NULL"),
@@ -45,7 +52,13 @@ class BlogPost(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         default=PublicationStatus.draft,
         nullable=False,
     )
+    visibility: Mapped[BlogVisibility] = mapped_column(
+        Enum(BlogVisibility, name="blog_visibility"),
+        default=BlogVisibility.public,
+        nullable=False,
+    )
     tags: Mapped[list[str]] = mapped_column(ARRAY(String), default=list, nullable=False)
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     project: Mapped[ResearchProject | None] = relationship(back_populates="blog_posts")
 

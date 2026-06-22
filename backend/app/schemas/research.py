@@ -4,7 +4,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models.enums import DatasetStatus, ExperimentStatus, PublicationStatus, ResearchStatus, TaskType
+from app.models.enums import BlogVisibility, DatasetStatus, ExperimentStatus, PublicationStatus, ResearchStatus, TaskType
 
 
 class ORMModel(BaseModel):
@@ -41,30 +41,36 @@ class ResearchProjectRead(ResearchProjectBase, ORMModel):
 class BlogPostBase(BaseModel):
     project_id: uuid.UUID | None = None
     title: str
+    slug: str | None = None
     excerpt: str | None = None
     content_markdown: str
     status: PublicationStatus = PublicationStatus.draft
+    visibility: BlogVisibility = BlogVisibility.public
     tags: list[str] = Field(default_factory=list)
 
 
 class BlogPostCreate(BlogPostBase):
-    slug: str | None = None
+    pass
 
 
 class BlogPostUpdate(BaseModel):
     project_id: uuid.UUID | None = None
     title: str | None = None
+    slug: str | None = None
     excerpt: str | None = None
     content_markdown: str | None = None
     status: PublicationStatus | None = None
+    visibility: BlogVisibility | None = None
     tags: list[str] | None = None
 
 
 class BlogPostRead(BlogPostBase, ORMModel):
     id: uuid.UUID
     slug: str
+    author_id: uuid.UUID
     created_at: datetime
     updated_at: datetime
+    published_at: datetime | None = None
 
 
 class PaperNoteBase(BaseModel):

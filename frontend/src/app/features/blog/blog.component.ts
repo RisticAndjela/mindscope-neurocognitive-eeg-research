@@ -13,5 +13,5 @@ import { ApiService } from '../../core/services/api.service';
 export class BlogComponent {
   private readonly api = inject(ApiService);
 
-  readonly posts$ = this.api.getBlogPosts();
+  readonly posts$ = this.api.listPublicBlogPosts();
 }

@@ -14,10 +14,13 @@ import { AuthService } from '../services/auth.service';
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
           <a routerLink="/projects" routerLinkActive="active">Projects</a>
           <a routerLink="/blog" routerLinkActive="active">Blog</a>
+          @if (authState().isResearcher) {
+            <a routerLink="/research/blog" routerLinkActive="active">Research Lab</a>
+          }
         </nav>
         @if (authState().user) {
           <div class="auth-actions">
-            <a [routerLink]="authState().isResearcher ? '/research-hub' : '/login'" class="login-link">
+            <a [routerLink]="authState().isResearcher ? '/research/blog' : '/login'" class="login-link">
               {{ authState().profile?.full_name || authState().user?.email }}
             </a>
             <button class="logout-button" type="button" (click)="logout()">Logout</button>

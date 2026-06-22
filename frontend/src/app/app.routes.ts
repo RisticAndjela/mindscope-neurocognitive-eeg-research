@@ -10,6 +10,9 @@ export const routes: Routes = [
   { path: 'blog', loadComponent: () => import('./features/blog/blog.component').then(m => m.BlogComponent) },
   { path: 'blog/:id', loadComponent: () => import('./features/blog/blog-detail/blog-detail.component').then(m => m.BlogDetailComponent) },
   { path: 'login', canActivate: [guestGuard], loadComponent: () => import('./features/login/login.component').then(m => m.LoginComponent) },
+  { path: 'research/blog', canActivate: [authGuard], loadComponent: () => import('./features/research-blog/research-blog.component').then(m => m.ResearchBlogComponent) },
+  { path: 'research/blog/new', canActivate: [authGuard], loadComponent: () => import('./features/research-blog/research-blog-editor/research-blog-editor.component').then(m => m.ResearchBlogEditorComponent) },
+  { path: 'research/blog/:id/edit', canActivate: [authGuard], loadComponent: () => import('./features/research-blog/research-blog-editor/research-blog-editor.component').then(m => m.ResearchBlogEditorComponent) },
   { path: 'research-hub', canActivate: [authGuard, researchGuard], loadComponent: () => import('./features/research-hub/research-hub.component').then(m => m.ResearchHubComponent) },
   { path: '**', redirectTo: '' }
 ];

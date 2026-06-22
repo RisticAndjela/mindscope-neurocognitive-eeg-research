@@ -7,6 +7,11 @@ class PublicationStatus(str, enum.Enum):
     archived = "archived"
 
 
+class BlogVisibility(str, enum.Enum):
+    public = "public"
+    private = "private"
+
+
 class ResearchStatus(str, enum.Enum):
     planned = "planned"
     active = "active"

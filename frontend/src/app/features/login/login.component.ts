@@ -95,6 +95,6 @@ export class LoginComponent {
   }
 
   private nextUrl() {
-    return this.route.snapshot.queryParamMap.get('next') || (this.authService.isResearcher() ? '/research-hub' : '/');
+    return this.route.snapshot.queryParamMap.get('next') || (this.authService.isResearcher() ? '/research/blog' : '/');
   }
 }
