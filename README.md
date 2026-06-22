@@ -1,16 +1,51 @@
-# MindScope
+# MindScope Backend
 
-MindScope is an open computational neuroscience research platform focused on understanding how attention, working memory, perception, and internal mental representations emerge from neural activity.
+Backend MVP for MindScope research documentation and blog management.
 
-The project combines:
+This backend focuses only on:
 
-- EEG signal processing
-- Neural state decoding
-- Machine learning
-- Cognitive modeling
-- Working memory simulation
-- Attention mechanisms
-- Sleep and dream-state research
-- Interactive experiment visualization
+- research projects
+- datasets
+- paper notes
+- blog posts
+- experiments
+- model runs
+- experiment metrics/results
 
-The long-term goal is to build computational models that help explain how internal brain states influence perception, awareness, and behavior.
+Recommended cloud database: **Supabase Postgres Free Plan**.
+
+## Stack
+
+- Python
+- FastAPI
+- SQLAlchemy 2
+- Pydantic 2
+- PostgreSQL / Supabase
+- Alembic-ready structure
+
+## Run locally
+
+```bash
+cd backend
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+pip install -r requirements.txt
+cp .env.example .env
+uvicorn app.main:app --reload
+```
+
+## Database
+
+Create a free Supabase project, copy the Postgres connection string, and put it in `.env`:
+
+```env
+DATABASE_URL=postgresql+asyncpg://postgres:<PASSWORD>@<HOST>:5432/postgres
+```
+
+Then run the SQL in:
+
+```txt
+backend/sql/001_initial_schema.sql
+```
+
+inside Supabase SQL Editor.
