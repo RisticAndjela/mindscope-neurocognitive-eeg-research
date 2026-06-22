@@ -19,12 +19,20 @@ export class ApiService {
     return this.http.get<ResearchProject>(`${this.baseUrl}/projects/${id}`);
   }
 
+  getProjectBySlug(slug: string) {
+    return this.http.get<ResearchProject>(`${this.baseUrl}/projects/slug/${slug}`);
+  }
+
   listPublicBlogPosts() {
     return this.http.get<BlogPost[]>(`${this.baseUrl}/blog-posts`);
   }
 
   getPublicBlogPost(id: string) {
     return this.http.get<BlogPost>(`${this.baseUrl}/blog-posts/${id}`);
+  }
+
+  getPublicBlogPostBySlug(slug: string) {
+    return this.http.get<BlogPost>(`${this.baseUrl}/blog-posts/slug/${slug}`);
   }
 
   listMyBlogPosts() {

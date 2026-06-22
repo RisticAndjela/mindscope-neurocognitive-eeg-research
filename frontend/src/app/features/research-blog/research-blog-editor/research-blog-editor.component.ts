@@ -33,10 +33,47 @@ export class ResearchBlogEditorComponent {
   protected readonly projects = signal<ResearchProject[]>([]);
   protected readonly isResearcher = computed(() => this.authService.isResearcher());
   protected readonly isEditMode = computed(() => !!this.postId);
-  protected readonly saveLabel = computed(() => (this.isEditMode() ? 'Save changes' : 'Create draft'));
+  protected readonly hasProjects = computed(() => this.projects().length > 0);
+  protected readonly saveLabel = computed(() => (this.isEditMode() ? 'Save notebook changes' : 'Save as draft'));
+  protected readonly primaryActionLabel = computed(() => (this.saving() ? 'Syncing notebook...' : this.saveLabel()));
+  protected readonly publishLabel = computed(() => {
+    if (this.saving()) {
+      return 'Publishing...';
+    }
+
+    return this.currentPost()?.status === 'published' && this.currentPost()?.visibility === 'public'
+      ? 'Update public publication'
+      : 'Publish to public journal';
+  });
+  protected readonly privateLabel = computed(() => {
+    if (this.saving()) {
+      return 'Saving privacy settings...';
+    }
+
+    return this.form.controls.visibility.value === 'private' ? 'Keep private in lab' : 'Save as private note';
+  });
   protected readonly wordCount = computed(() => {
     const content = this.form.controls.content_markdown.value.trim();
     return content ? content.split(/\s+/).length : 0;
+  });
+  protected readonly statusTone = computed(() => this.form.controls.status.value);
+  protected readonly statusLabel = computed(() => {
+    switch (this.form.controls.status.value) {
+      case 'published':
+        return 'Published signal';
+      case 'archived':
+        return 'Archived record';
+      default:
+        return 'Draft in progress';
+    }
+  });
+  protected readonly visibilityTone = computed(() => this.form.controls.visibility.value);
+  protected readonly visibilityLabel = computed(() =>
+    this.form.controls.visibility.value === 'private' ? 'Private lab access' : 'Public journal access'
+  );
+  protected readonly selectedProjectTitle = computed(() => {
+    const selectedId = this.form.controls.project_id.value;
+    return this.projects().find((project) => project.id === selectedId)?.title ?? 'No linked project';
   });
 
   protected readonly form = this.fb.nonNullable.group({
@@ -156,7 +193,7 @@ export class ResearchBlogEditorComponent {
 
       this.successMessage.set(
         payload.status === 'published'
-          ? `Saved and ${payload.visibility === 'private' ? 'kept private inside the lab' : 'published publicly'}.`
+          ? `Saved and ${payload.visibility === 'private' ? 'kept private inside the lab' : 'published to the public journal'}.`
           : 'Draft saved in your research notebook.'
       );
     });

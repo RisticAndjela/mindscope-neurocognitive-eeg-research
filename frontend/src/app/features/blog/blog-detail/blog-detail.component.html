@@ -21,5 +21,13 @@
       }
       <pre>{{ post.content_markdown }}</pre>
     </article>
+  } @else {
+    <article class="glass-card post">
+      <div class="meta-strip">
+        <span class="badge">Loading note</span>
+      </div>
+      <h1>Opening the notebook page...</h1>
+      <p class="excerpt">Fetching the published research note and public metadata.</p>
+    </article>
   }
 </section>

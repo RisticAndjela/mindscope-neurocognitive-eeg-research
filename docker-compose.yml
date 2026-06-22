@@ -13,7 +13,9 @@ services:
     command: python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:
-    image: node:22-alpine
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: mindscope-frontend
     working_dir: /app
     ports:
@@ -21,6 +23,6 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    command: sh -c "npm install && npm start -- --host 0.0.0.0"
+    command: npm start -- --host 0.0.0.0 --port 4200
     depends_on:
       - backend

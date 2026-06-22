@@ -11,7 +11,7 @@ from app.utils.slugs import make_slug
 
 async def create_research_project(session: AsyncSession, payload) -> ResearchProject:
     data = payload.model_dump()
-    data["slug"] = data.get("slug") or make_slug(data["title"])
+    data["slug"] = make_slug(data.get("slug") or data["title"])
     return await research_project_repo.create(session, data)
 
 

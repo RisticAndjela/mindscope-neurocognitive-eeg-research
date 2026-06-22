@@ -1,5 +1,5 @@
 <section class="page detail-page">
-  <a routerLink="/projects" class="back-link">← Back to projects</a>
+  <a routerLink="/projects" class="back-link">Back to projects</a>
 
   @if (project$ | async; as project) {
     <article class="glass-card detail">
@@ -8,12 +8,18 @@
       <p class="summary">{{ project.summary }}</p>
       <div class="question">
         <p>Research question</p>
-        <h2>{{ project.research_question }}</h2>
+        <h2>{{ project.research_question || 'This project is still crystallizing its core question.' }}</h2>
       </div>
       <div class="tags">
         @for (tag of project.tags; track tag) { <span>{{ tag }}</span> }
       </div>
       <small>Created {{ project.created_at | date:'medium' }}</small>
+    </article>
+  } @else {
+    <article class="glass-card detail">
+      <span class="badge">Loading project</span>
+      <h1>Reading project notes...</h1>
+      <p class="summary">Fetching the public project snapshot and research framing.</p>
     </article>
   }
 </section>

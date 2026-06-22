@@ -17,3 +17,4 @@
 .tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0; }
 .tags span { padding: 7px 10px; border: 1px solid var(--border); border-radius: 999px; color: var(--text-muted); font-size: 12px; }
 small { color: var(--text-muted); }
+.loading-card { min-height: 200px; }

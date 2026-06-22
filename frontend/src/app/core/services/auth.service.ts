@@ -124,7 +124,7 @@ export class AuthService {
 
   private async initialize() {
     if (!isSupabaseConfigured) {
-      this.authErrorState.set('Supabase is not configured. Add your real Supabase anon key in frontend/src/environments/environment.ts.');
+      this.authErrorState.set('Supabase is not configured. Update frontend/src/environments/environment.ts with your project values.');
       this.initialized.set(true);
       return;
     }
@@ -217,7 +217,7 @@ export class AuthService {
 
   private ensureSupabaseConfigured() {
     if (!isSupabaseConfigured) {
-      throw new Error('Supabase is not configured. Add your real Supabase anon key in frontend/src/environments/environment.ts.');
+      throw new Error('Supabase is not configured. Update frontend/src/environments/environment.ts with your project values.');
     }
   }
 }

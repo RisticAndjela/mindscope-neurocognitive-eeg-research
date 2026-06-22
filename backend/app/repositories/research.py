@@ -36,6 +36,18 @@ class BlogPostRepository(CRUDRepository[BlogPost, dict, dict]):
         )
         return result.scalar_one_or_none()
 
+    async def get_public_by_slug(self, session: AsyncSession, slug: str) -> BlogPost | None:
+        result = await session.execute(
+            select(BlogPost).where(
+                and_(
+                    BlogPost.slug == slug,
+                    BlogPost.status == PublicationStatus.published,
+                    BlogPost.visibility == BlogVisibility.public,
+                )
+            )
+        )
+        return result.scalar_one_or_none()
+
     async def list_for_author(self, session: AsyncSession, author_id: uuid.UUID, limit: int = 100, offset: int = 0) -> list[BlogPost]:
         result = await session.execute(
             select(BlogPost)
@@ -69,7 +81,14 @@ class BlogPostRepository(CRUDRepository[BlogPost, dict, dict]):
         )
         return result.scalar_one_or_none()
 
-research_project_repo = CRUDRepository(ResearchProject)
+
+class ResearchProjectRepository(CRUDRepository[ResearchProject, dict, dict]):
+    async def get_by_slug(self, session: AsyncSession, slug: str) -> ResearchProject | None:
+        result = await session.execute(select(ResearchProject).where(ResearchProject.slug == slug))
+        return result.scalar_one_or_none()
+
+
+research_project_repo = ResearchProjectRepository(ResearchProject)
 blog_post_repo = BlogPostRepository(BlogPost)
 paper_note_repo = CRUDRepository(PaperNote)
 dataset_repo = CRUDRepository(Dataset)

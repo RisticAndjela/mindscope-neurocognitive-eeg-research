@@ -63,6 +63,14 @@ async def list_projects(
     return await research_project_repo.list(session, limit, offset)
 
 
+@router.get("/projects/slug/{slug}", response_model=ResearchProjectRead)
+async def get_project_by_slug(slug: str, session: AsyncSession = Depends(get_db_session)):
+    project = await research_project_repo.get_by_slug(session, slug)
+    if project is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return project
+
+
 @router.get("/projects/{project_id}", response_model=ResearchProjectRead)
 async def get_project(project_id: uuid.UUID, session: AsyncSession = Depends(get_db_session)):
     return await get_or_404(research_project_repo, session, project_id)
@@ -120,6 +128,14 @@ async def get_my_post(
     current_user: CurrentUser = Depends(require_research_user),
 ):
     post = await blog_post_repo.get_for_author(session, post_id, current_user.id)
+    if post is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return post
+
+
+@router.get("/blog-posts/slug/{slug}", response_model=BlogPostRead)
+async def get_post_by_slug(slug: str, session: AsyncSession = Depends(get_db_session)):
+    post = await blog_post_repo.get_public_by_slug(session, slug)
     if post is None:
         raise HTTPException(status_code=404, detail="Item not found")
     return post

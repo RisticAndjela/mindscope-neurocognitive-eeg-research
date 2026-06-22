@@ -6,3 +6,6 @@ node_modules/
 dist/
 .DS_Store
 .vscode/
+frontend/.angular/
+.angular/
+frontend/src/environments/environment.ts

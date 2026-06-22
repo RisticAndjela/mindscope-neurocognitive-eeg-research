@@ -60,6 +60,10 @@ p, small { color: var(--text-muted); }
   font-size: 12px;
 }
 .empty-card { display: block; }
+.loading-card {
+  border-color: rgba(53, 200, 255, 0.22);
+  box-shadow: 0 0 32px rgba(53, 200, 255, 0.1);
+}
 @media (max-width: 760px) {
   .post-card { flex-direction: column; }
 }

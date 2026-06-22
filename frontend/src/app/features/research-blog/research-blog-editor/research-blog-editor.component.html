@@ -24,8 +24,12 @@
       </div>
 
       <div class="status-cluster">
-        <span class="status-pill">{{ form.controls.status.value }}</span>
-        <span class="status-pill visibility">{{ form.controls.visibility.value }}</span>
+        <span class="status-pill" [class.published]="statusTone() === 'published'" [class.archived]="statusTone() === 'archived'">
+          {{ statusLabel() }}
+        </span>
+        <span class="status-pill visibility" [class.private]="visibilityTone() === 'private'">
+          {{ visibilityLabel() }}
+        </span>
       </div>
     </header>
 
@@ -39,6 +43,17 @@
 
     <form class="editor-grid" [formGroup]="form" (ngSubmit)="save()">
       <section class="editor-main glass-card">
+        <div class="notebook-banner">
+          <div>
+            <span>Research notebook</span>
+            <strong>{{ selectedProjectTitle() }}</strong>
+          </div>
+          <div>
+            <span>Word count</span>
+            <strong>{{ wordCount() }}</strong>
+          </div>
+        </div>
+
         <label class="field title-field">
           <span>Title</span>
           <input type="text" formControlName="title" placeholder="Decoding working memory with time-frequency attention maps" />
@@ -51,6 +66,7 @@
 
         <label class="field markdown-field">
           <span>Content markdown</span>
+          <small class="field-hint">Write like a lab notebook: hypotheses, anomalies, methods, signal artifacts, and next questions.</small>
           <textarea
             formControlName="content_markdown"
             rows="22"
@@ -95,6 +111,13 @@
             </select>
           </label>
 
+          @if (!hasProjects()) {
+            <div class="inline-empty-state">
+              <strong>No projects linked yet</strong>
+              <p>You can still write and publish. Add research projects later from the backend or your project setup flow.</p>
+            </div>
+          }
+
           <label class="field">
             <span>Tags</span>
             <input type="text" formControlName="tags" placeholder="eeg, attention, decoding" />
@@ -111,16 +134,24 @@
             <span>Mode</span>
             <strong>{{ isEditMode() ? 'Editing' : 'Drafting' }}</strong>
           </div>
+          <div class="summary-row status-summary">
+            <span>Access</span>
+            <strong>{{ visibilityTone() === 'private' ? 'Lab only' : 'Public' }}</strong>
+          </div>
+
+          <p class="control-note">
+            Drafts stay fluid. Private notes remain visible only in the research workspace. Public publications appear on the open MindScope journal.
+          </p>
 
           <div class="action-stack">
             <button class="primary-button glow-button" type="submit" [disabled]="saving() || deleting()">
-              {{ saving() ? 'Saving...' : saveLabel() }}
+              {{ primaryActionLabel() }}
             </button>
             <button class="secondary-button glow-outline" type="button" (click)="publishPublicly()" [disabled]="saving() || deleting()">
-              Publish publicly
+              {{ publishLabel() }}
             </button>
             <button class="secondary-button glow-outline" type="button" (click)="markPrivate()" [disabled]="saving() || deleting()">
-              Mark private
+              {{ privateLabel() }}
             </button>
             @if (currentPost()) {
               <button class="secondary-button glow-outline" type="button" (click)="archive()" [disabled]="saving() || deleting()">

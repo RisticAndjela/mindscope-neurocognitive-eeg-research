@@ -10,31 +10,38 @@
 
   <div class="post-list">
     @if (posts$ | async; as posts) {
-      @for (post of posts; track post.id) {
-        <a [routerLink]="['/blog', post.id]" class="post-card glass-card">
-          <div class="post-copy">
-            <div class="post-meta-row">
-              <span class="status">{{ post.status }}</span>
-              <span class="visibility">{{ post.visibility }}</span>
-            </div>
-            <h2>{{ post.title }}</h2>
-            <p>{{ post.excerpt || 'No excerpt yet.' }}</p>
-            @if (post.tags.length) {
-              <div class="tag-row">
-                @for (tag of post.tags; track tag) {
-                  <span>{{ tag }}</span>
-                }
+      @if (posts.length) {
+        @for (post of posts; track post.id) {
+          <a [routerLink]="['/blog', post.slug]" class="post-card glass-card">
+            <div class="post-copy">
+              <div class="post-meta-row">
+                <span class="status">{{ post.status }}</span>
+                <span class="visibility">{{ post.visibility }}</span>
               </div>
-            }
-          </div>
-          <small>{{ (post.published_at || post.created_at) | date:'mediumDate' }}</small>
-        </a>
-      } @empty {
+              <h2>{{ post.title }}</h2>
+              <p>{{ post.excerpt || 'No excerpt yet.' }}</p>
+              @if (post.tags.length) {
+                <div class="tag-row">
+                  @for (tag of post.tags; track tag) {
+                    <span>{{ tag }}</span>
+                  }
+                </div>
+              }
+            </div>
+            <small>{{ (post.published_at || post.created_at) | date:'mediumDate' }}</small>
+          </a>
+        }
+      } @else {
         <div class="post-card glass-card empty-card">
           <h2>No public notes yet.</h2>
           <p>The research feed is quiet for now. Published public posts will appear here once a researcher opens the notebook.</p>
         </div>
       }
+    } @else {
+      <div class="post-card glass-card empty-card loading-card">
+        <h2>Tuning into the journal...</h2>
+        <p>Loading published notes from the MindScope research log.</p>
+      </div>
     }
   </div>
 </section>

@@ -7,19 +7,23 @@
 
   <div class="grid">
     @if (projects$ | async; as projects) {
-      @for (project of projects; track project.id) {
-        <a class="card glass-card" [routerLink]="['/projects', project.id]">
-          <div class="status">{{ project.status }}</div>
-          <h2>{{ project.title }}</h2>
-          <p>{{ project.summary }}</p>
-          <div class="tags">
-            @for (tag of project.tags; track tag) { <span>{{ tag }}</span> }
-          </div>
-          <small>Updated {{ project.updated_at | date:'mediumDate' }}</small>
-        </a>
-      } @empty {
+      @if (projects.length) {
+        @for (project of projects; track project.id) {
+          <a class="card glass-card" [routerLink]="['/projects', project.slug]">
+            <div class="status">{{ project.status }}</div>
+            <h2>{{ project.title }}</h2>
+            <p>{{ project.summary }}</p>
+            <div class="tags">
+              @for (tag of project.tags; track tag) { <span>{{ tag }}</span> }
+            </div>
+            <small>Updated {{ project.updated_at | date:'mediumDate' }}</small>
+          </a>
+        }
+      } @else {
         <div class="card glass-card"><h2>No projects yet.</h2><p>Create your first project from FastAPI Swagger.</p></div>
       }
+    } @else {
+      <div class="card glass-card loading-card"><h2>Indexing projects...</h2><p>Loading current research threads and public summaries.</p></div>
     }
   </div>
 </section>

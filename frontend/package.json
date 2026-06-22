@@ -2,7 +2,7 @@
   "name": "mindscope-frontend",
   "version": "0.1.0",
   "scripts": {
-    "start": "ng serve --open",
+    "start": "ng serve",
     "build": "ng build"
   },
   "dependencies": {

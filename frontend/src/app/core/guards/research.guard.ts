@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
-export const researchGuard: CanActivateFn = async () => {
+export const researchGuard: CanActivateFn = async (_route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
@@ -16,5 +16,7 @@ export const researchGuard: CanActivateFn = async () => {
     return true;
   }
 
-  return router.createUrlTree(['/']);
+  return router.createUrlTree(['/research/forbidden'], {
+    queryParams: { next: state.url }
+  });
 };

@@ -16,6 +16,6 @@ export class ProjectDetailComponent {
   private readonly api = inject(ApiService);
 
   readonly project$ = this.route.paramMap.pipe(
-    switchMap(params => this.api.getProject(params.get('id') ?? ''))
+    switchMap(params => this.api.getProjectBySlug(params.get('slug') ?? ''))
   );
 }

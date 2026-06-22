@@ -20,7 +20,7 @@ import { AuthService } from '../services/auth.service';
         </nav>
         @if (authState().user) {
           <div class="auth-actions">
-            <a [routerLink]="authState().isResearcher ? '/research/blog' : '/login'" class="login-link">
+            <a [routerLink]="authState().isResearcher ? '/research/blog' : '/research/forbidden'" class="login-link">
               {{ authState().profile?.full_name || authState().user?.email }}
             </a>
             <button class="logout-button" type="button" (click)="logout()">Logout</button>
