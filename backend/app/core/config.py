@@ -7,7 +7,8 @@ class Settings(BaseSettings):
     app_env: str = "development"
     api_prefix: str = "/api/v1"
     database_url: str
-    cors_origins: str = "http://localhost:4200"
+    cors_origins: str = "http://localhost:4200,http://127.0.0.1:4200"
+    cors_origin_regex: str = r"https?://(localhost|127\.0\.0\.1)(:\d+)?"
     supabase_url: str = ""
     supabase_jwks_url: str = ""
     supabase_jwt_audience: str = "authenticated"

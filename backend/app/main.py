@@ -6,12 +6,14 @@ from app.core.cors import configure_cors
 
 settings = get_settings()
 
-app = FastAPI(title=settings.app_name)
-configure_cors(app, settings)
+fastapi_app = FastAPI(title=settings.app_name)
 
-app.include_router(api_router, prefix=settings.api_prefix)
+fastapi_app.include_router(api_router, prefix=settings.api_prefix)
 
 
-@app.get("/health")
+@fastapi_app.get("/health")
 async def health_check():
     return {"status": "ok", "service": settings.app_name}
+
+
+app = configure_cors(fastapi_app, settings)
