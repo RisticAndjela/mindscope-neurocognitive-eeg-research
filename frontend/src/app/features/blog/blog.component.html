@@ -1,0 +1,24 @@
+<section class="page listing-page">
+  <div class="section-header">
+    <span class="badge">Public research blog</span>
+    <h1>Notes from the edge of cognition.</h1>
+    <p>Public progress updates, paper reflections, design notes, and research questions.</p>
+  </div>
+
+  <div class="post-list">
+    @if (posts$ | async; as posts) {
+      @for (post of posts; track post.id) {
+        <a [routerLink]="['/blog', post.id]" class="post-card glass-card">
+          <div>
+            <span class="status">{{ post.status }}</span>
+            <h2>{{ post.title }}</h2>
+            <p>{{ post.excerpt || 'No excerpt yet.' }}</p>
+          </div>
+          <small>{{ post.created_at | date:'mediumDate' }}</small>
+        </a>
+      } @empty {
+        <div class="post-card glass-card"><h2>No blog posts yet.</h2><p>Create your first public note through the backend.</p></div>
+      }
+    }
+  </div>
+</section>

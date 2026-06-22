@@ -1,0 +1,19 @@
+.post-page { padding: 70px 0; }
+.back-link { color: var(--text-muted); }
+.post { margin-top: 22px; padding: clamp(28px, 5vw, 52px); }
+h1 {
+  margin: 22px 0 8px;
+  font-family: "Space Grotesk";
+  font-size: clamp(40px, 7vw, 74px);
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+.meta { color: var(--text-muted); }
+pre {
+  margin-top: 34px;
+  white-space: pre-wrap;
+  color: var(--text-soft);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.8;
+}

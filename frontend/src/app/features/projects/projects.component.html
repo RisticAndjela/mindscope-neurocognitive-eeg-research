@@ -1,0 +1,25 @@
+<section class="page listing-page">
+  <div class="section-header">
+    <span class="badge">Research projects</span>
+    <h1>Active cognitive systems research.</h1>
+    <p>Each project can connect blog posts, paper notes, datasets, experiments, and model runs.</p>
+  </div>
+
+  <div class="grid">
+    @if (projects$ | async; as projects) {
+      @for (project of projects; track project.id) {
+        <a class="card glass-card" [routerLink]="['/projects', project.id]">
+          <div class="status">{{ project.status }}</div>
+          <h2>{{ project.title }}</h2>
+          <p>{{ project.summary }}</p>
+          <div class="tags">
+            @for (tag of project.tags; track tag) { <span>{{ tag }}</span> }
+          </div>
+          <small>Updated {{ project.updated_at | date:'mediumDate' }}</small>
+        </a>
+      } @empty {
+        <div class="card glass-card"><h2>No projects yet.</h2><p>Create your first project from FastAPI Swagger.</p></div>
+      }
+    }
+  </div>
+</section>

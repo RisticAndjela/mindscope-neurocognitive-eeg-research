@@ -1,0 +1,35 @@
+.orb {
+  position: relative;
+  width: min(420px, 78vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(243,246,252,.16), transparent 10%),
+    radial-gradient(circle at 55% 45%, rgba(53,200,255,.2), transparent 28%),
+    radial-gradient(circle at 45% 58%, rgba(124,92,255,.35), transparent 38%),
+    radial-gradient(circle, rgba(0,230,168,.08), transparent 65%);
+  filter: drop-shadow(0 0 56px rgba(124,92,255,.34));
+  animation: float 8s ease-in-out infinite;
+}
+.ring { position: absolute; inset: 12%; border: 1px solid rgba(143,155,179,.24); border-radius: 50%; }
+.ring-one { transform: rotateX(64deg) rotateZ(18deg); }
+.ring-two { transform: rotateX(72deg) rotateZ(92deg); border-color: rgba(53,200,255,.28); }
+.ring-three { inset: 23%; border-color: rgba(0,230,168,.24); animation: pulseGlow 4s ease-in-out infinite; }
+.node {
+  position: absolute; width: 9px; height: 9px; border-radius: 50%;
+  background: currentColor; box-shadow: 0 0 20px currentColor;
+}
+.node-1 { top: 18%; left: 48%; color: var(--secondary); }
+.node-2 { top: 29%; left: 73%; color: var(--primary); }
+.node-3 { top: 50%; left: 82%; color: var(--accent); }
+.node-4 { top: 70%; left: 66%; color: var(--secondary); }
+.node-5 { top: 77%; left: 38%; color: var(--primary); }
+.node-6 { top: 61%; left: 18%; color: var(--accent); }
+.node-7 { top: 36%; left: 17%; color: var(--secondary); }
+.node-8 { top: 43%; left: 48%; color: var(--text); }
+.node-9 { top: 56%; left: 55%; color: var(--primary); }
+.scanline {
+  position: absolute; top: 0; bottom: 0; width: 36%;
+  background: linear-gradient(90deg, transparent, rgba(53,200,255,.17), transparent);
+  animation: scan 5s ease-in-out infinite;
+}

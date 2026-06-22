@@ -1,0 +1,17 @@
+{
+  "files.exclude": {
+    "**/.angular": true,
+    "**/node_modules": true
+  },
+  "search.exclude": {
+    "**/.angular": true,
+    "**/node_modules": true
+  },
+  "typescript.tsserver.watchOptions": {
+    "excludeDirectories": [
+      "**/.angular",
+      "**/dist",
+      "**/node_modules"
+    ]
+  }
+}

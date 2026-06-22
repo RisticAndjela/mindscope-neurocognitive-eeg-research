@@ -1,0 +1,12 @@
+<section class="page post-page">
+  <a routerLink="/blog" class="back-link">← Back to blog</a>
+
+  @if (post$ | async; as post) {
+    <article class="glass-card post">
+      <span class="badge">{{ post.status }}</span>
+      <h1>{{ post.title }}</h1>
+      <p class="meta">{{ post.created_at | date:'medium' }}</p>
+      <pre>{{ post.content_markdown }}</pre>
+    </article>
+  }
+</section>

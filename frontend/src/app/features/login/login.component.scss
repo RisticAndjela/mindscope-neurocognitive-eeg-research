@@ -1,0 +1,10 @@
+.login-page { min-height: calc(100vh - 100px); display: grid; place-items: center; padding: 60px 0; }
+.login-card { width: min(620px, 100%); padding: clamp(28px, 5vw, 52px); text-align: center; }
+h1 {
+  margin: 22px 0 10px;
+  font-family: "Space Grotesk";
+  font-size: clamp(38px, 6vw, 64px);
+  letter-spacing: -0.06em;
+}
+p { color: var(--text-soft); line-height: 1.7; }
+button:disabled { opacity: .65; cursor: not-allowed; }
