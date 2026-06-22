@@ -1,0 +1,40 @@
+<section class="page listing-page">
+  <div class="section-header hero-card glass-card">
+    <span class="badge">Public research log</span>
+    <h1>Signals from the lab notebook.</h1>
+    <p>
+      Public writing from MindScope: experimental notes, cognitive modeling reflections, and field reports
+      from the border between EEG research and AI systems.
+    </p>
+  </div>
+
+  <div class="post-list">
+    @if (posts$ | async; as posts) {
+      @for (post of posts; track post.id) {
+        <a [routerLink]="['/blog', post.id]" class="post-card glass-card">
+          <div class="post-copy">
+            <div class="post-meta-row">
+              <span class="status">{{ post.status }}</span>
+              <span class="visibility">{{ post.visibility }}</span>
+            </div>
+            <h2>{{ post.title }}</h2>
+            <p>{{ post.excerpt || 'No excerpt yet.' }}</p>
+            @if (post.tags.length) {
+              <div class="tag-row">
+                @for (tag of post.tags; track tag) {
+                  <span>{{ tag }}</span>
+                }
+              </div>
+            }
+          </div>
+          <small>{{ (post.published_at || post.created_at) | date:'mediumDate' }}</small>
+        </a>
+      } @empty {
+        <div class="post-card glass-card empty-card">
+          <h2>No public notes yet.</h2>
+          <p>The research feed is quiet for now. Published public posts will appear here once a researcher opens the notebook.</p>
+        </div>
+      }
+    }
+  </div>
+</section>

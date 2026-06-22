@@ -1,0 +1,138 @@
+<section class="page editor-page">
+  @if (!isResearcher()) {
+    <ms-research-forbidden-state />
+  } @else if (loading()) {
+    <div class="editor-shell glass-card loading-state">
+      <h1>Preparing research notebook...</h1>
+      <p>Loading metadata, project links, and publication controls.</p>
+    </div>
+  } @else if (errorMessage() && !currentPost() && isEditMode()) {
+    <div class="editor-shell glass-card loading-state">
+      <h1>Editor unavailable</h1>
+      <p>{{ errorMessage() }}</p>
+    </div>
+  } @else {
+    <header class="editor-header">
+      <div>
+        <a routerLink="/research/blog" class="back-link">Back to research blog</a>
+        <span class="badge">{{ isEditMode() ? 'Edit publication' : 'New research note' }}</span>
+        <h1>{{ isEditMode() ? 'Refine the manuscript' : 'Open a fresh notebook page' }}</h1>
+        <p>
+          A focused writing surface for research notes, lab updates, and public-facing essays. Shape the story,
+          then decide whether it stays private or goes live.
+        </p>
+      </div>
+
+      <div class="status-cluster">
+        <span class="status-pill">{{ form.controls.status.value }}</span>
+        <span class="status-pill visibility">{{ form.controls.visibility.value }}</span>
+      </div>
+    </header>
+
+    @if (errorMessage()) {
+      <div class="notice error glass-card">{{ errorMessage() }}</div>
+    }
+
+    @if (successMessage()) {
+      <div class="notice success glass-card">{{ successMessage() }}</div>
+    }
+
+    <form class="editor-grid" [formGroup]="form" (ngSubmit)="save()">
+      <section class="editor-main glass-card">
+        <label class="field title-field">
+          <span>Title</span>
+          <input type="text" formControlName="title" placeholder="Decoding working memory with time-frequency attention maps" />
+        </label>
+
+        <label class="field">
+          <span>Excerpt</span>
+          <textarea formControlName="excerpt" rows="3" placeholder="A concise overview for the public journal and workspace cards."></textarea>
+        </label>
+
+        <label class="field markdown-field">
+          <span>Content markdown</span>
+          <textarea
+            formControlName="content_markdown"
+            rows="22"
+            placeholder="# Research note&#10;&#10;Document the protocol, insights, interpretation, and next questions here."
+          ></textarea>
+        </label>
+      </section>
+
+      <aside class="editor-sidebar">
+        <div class="sidebar-card glass-card">
+          <h2>Metadata</h2>
+
+          <label class="field">
+            <span>Slug</span>
+            <input type="text" formControlName="slug" placeholder="auto-generated-from-title" />
+          </label>
+
+          <label class="field">
+            <span>Status</span>
+            <select formControlName="status">
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="archived">Archived</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Visibility</span>
+            <select formControlName="visibility">
+              <option value="public">Public</option>
+              <option value="private">Private</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Project</span>
+            <select formControlName="project_id">
+              <option value="">No linked project</option>
+              @for (project of projects(); track project.id) {
+                <option [value]="project.id">{{ project.title }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Tags</span>
+            <input type="text" formControlName="tags" placeholder="eeg, attention, decoding" />
+          </label>
+        </div>
+
+        <div class="sidebar-card glass-card sticky">
+          <h2>Publish controls</h2>
+          <div class="summary-row">
+            <span>Words</span>
+            <strong>{{ wordCount() }}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Mode</span>
+            <strong>{{ isEditMode() ? 'Editing' : 'Drafting' }}</strong>
+          </div>
+
+          <div class="action-stack">
+            <button class="primary-button glow-button" type="submit" [disabled]="saving() || deleting()">
+              {{ saving() ? 'Saving...' : saveLabel() }}
+            </button>
+            <button class="secondary-button glow-outline" type="button" (click)="publishPublicly()" [disabled]="saving() || deleting()">
+              Publish publicly
+            </button>
+            <button class="secondary-button glow-outline" type="button" (click)="markPrivate()" [disabled]="saving() || deleting()">
+              Mark private
+            </button>
+            @if (currentPost()) {
+              <button class="secondary-button glow-outline" type="button" (click)="archive()" [disabled]="saving() || deleting()">
+                Archive
+              </button>
+              <button class="secondary-button destructive" type="button" (click)="deletePost()" [disabled]="saving() || deleting()">
+                {{ deleting() ? 'Deleting...' : 'Delete permanently' }}
+              </button>
+            }
+          </div>
+        </div>
+      </aside>
+    </form>
+  }
+</section>

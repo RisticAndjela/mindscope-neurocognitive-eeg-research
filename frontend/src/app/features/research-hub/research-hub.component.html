@@ -1,0 +1,15 @@
+<section class="page research-page">
+  <div class="research-card glass-card">
+    <span class="badge">Research access</span>
+    <h1>Research hub</h1>
+    <p>
+      This page is available only to users with the <code>research</code> role. We can later place
+      private project editing, experiments, and dataset workflows here.
+    </p>
+
+    <div class="profile-box">
+      <p><strong>User:</strong> {{ profile()?.full_name || profile()?.email }}</p>
+      <p><strong>Role:</strong> {{ profile()?.role }}</p>
+    </div>
+  </div>
+</section>

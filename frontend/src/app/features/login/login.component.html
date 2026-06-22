@@ -1,0 +1,131 @@
+<section class="page login-page">
+  <div class="login-card glass-card">
+    <span class="badge">Private workspace</span>
+    <h1>MindScope <span class="gradient-text">Auth</span></h1>
+    <p class="lead">
+      Login and registration are connected to Supabase Auth. During registration, you can choose
+      whether the user is <strong>research</strong> or <strong>regular</strong>, and the profile is
+      automatically created in the <code>profiles</code> table.
+    </p>
+
+    @if (!authState().isReady) {
+      <p class="status-message">Loading session...</p>
+    } @else if (authState().user) {
+      <div class="session-panel">
+        <div>
+          <p class="eyebrow">Active session</p>
+          <h2>{{ authState().profile?.full_name || authState().user?.email }}</h2>
+          <p class="meta">
+            {{ authState().user?.email }} - {{ authState().isResearcher ? 'Research user' : 'Regular user' }}
+          </p>
+        </div>
+        <button class="secondary-button" type="button" (click)="logout()" [disabled]="authState().isLoading">
+          Logout
+        </button>
+      </div>
+    } @else {
+      <div class="mode-switch" role="tablist" aria-label="Auth mode">
+        <button
+          type="button"
+          class="mode-button"
+          [class.active]="mode() === 'login'"
+          (click)="setMode('login')">
+          Login
+        </button>
+        <button
+          type="button"
+          class="mode-button"
+          [class.active]="mode() === 'register'"
+          (click)="setMode('register')">
+          Register
+        </button>
+      </div>
+
+      @if (mode() === 'login') {
+        <form class="auth-form" (ngSubmit)="login()">
+          <label>
+            <span>Email</span>
+            <input type="email" name="loginEmail" [(ngModel)]="loginEmail" required autocomplete="email" />
+          </label>
+
+          <label>
+            <span>Password</span>
+            <input
+              type="password"
+              name="loginPassword"
+              [(ngModel)]="loginPassword"
+              required
+              minlength="6"
+              autocomplete="current-password" />
+          </label>
+
+          <button class="primary-button" type="submit" [disabled]="authState().isLoading">
+            {{ authState().isLoading ? 'Signing in...' : 'Login' }}
+          </button>
+        </form>
+      } @else {
+        <form class="auth-form" (ngSubmit)="register()">
+          <label>
+            <span>Full name</span>
+            <input
+              type="text"
+              name="fullName"
+              [(ngModel)]="registerForm.fullName"
+              required
+              autocomplete="name" />
+          </label>
+
+          <label>
+            <span>Email</span>
+            <input type="email" name="registerEmail" [(ngModel)]="registerForm.email" required autocomplete="email" />
+          </label>
+
+          <label>
+            <span>Password</span>
+            <input
+              type="password"
+              name="registerPassword"
+              [(ngModel)]="registerForm.password"
+              required
+              minlength="6"
+              autocomplete="new-password" />
+          </label>
+
+          <fieldset class="role-picker">
+            <legend>User type</legend>
+            <label class="role-option">
+              <input type="radio" name="role" [(ngModel)]="registerForm.role" value="regular" />
+              <span>
+                <strong>Regular</strong>
+                <small>A standard application user.</small>
+              </span>
+            </label>
+            <label class="role-option">
+              <input type="radio" name="role" [(ngModel)]="registerForm.role" value="research" />
+              <span>
+                <strong>Research</strong>
+                <small>A user with research and editing access.</small>
+              </span>
+            </label>
+          </fieldset>
+
+          <button class="primary-button" type="submit" [disabled]="authState().isLoading">
+            {{ authState().isLoading ? 'Creating account...' : 'Register' }}
+          </button>
+        </form>
+      }
+    }
+
+    @if (errorMessage) {
+      <p class="feedback error">{{ errorMessage }}</p>
+    }
+
+    @if (authState().authError) {
+      <p class="feedback error">{{ authState().authError }}</p>
+    }
+
+    @if (successMessage) {
+      <p class="feedback success">{{ successMessage }}</p>
+    }
+  </div>
+</section>
