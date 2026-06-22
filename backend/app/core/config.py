@@ -8,12 +8,15 @@ class Settings(BaseSettings):
     api_prefix: str = "/api/v1"
     database_url: str
     cors_origins: str = "http://localhost:4200"
+    supabase_url: str = ""
+    supabase_jwks_url: str = ""
+    supabase_jwt_audience: str = "authenticated"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     @property
-    def cors_origin_list(self) -> list[str]:
-        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+    def supabase_issuer(self) -> str:
+        return f"{self.supabase_url.rstrip('/')}/auth/v1"
 
 
 @lru_cache

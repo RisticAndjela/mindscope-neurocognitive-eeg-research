@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'ms-app-layout',
@@ -14,11 +15,32 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
           <a routerLink="/projects" routerLinkActive="active">Projects</a>
           <a routerLink="/blog" routerLinkActive="active">Blog</a>
         </nav>
-        <a routerLink="/login" class="login-link">Login</a>
+        @if (authState().user) {
+          <div class="auth-actions">
+            <a [routerLink]="authState().isResearcher ? '/research-hub' : '/login'" class="login-link">
+              {{ authState().profile?.full_name || authState().user?.email }}
+            </a>
+            <button class="logout-button" type="button" (click)="logout()">Logout</button>
+          </div>
+        } @else {
+          <a routerLink="/login" class="login-link">Login</a>
+        }
       </header>
       <main><ng-content /></main>
     </div>
   `,
   styleUrl: './app-layout.component.scss'
 })
-export class AppLayoutComponent {}
+export class AppLayoutComponent {
+  private readonly authService = inject(AuthService);
+
+  protected readonly authState = computed(() => ({
+    user: this.authService.user(),
+    profile: this.authService.profile(),
+    isResearcher: this.authService.isResearcher()
+  }));
+
+  protected async logout() {
+    await this.authService.logout();
+  }
+}

@@ -42,8 +42,24 @@
   color: var(--text); background: rgba(255,255,255,.065);
 }
 .login-link { justify-self: end; border: 1px solid rgba(124,92,255,.35); }
+.auth-actions {
+  justify-self: end;
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+}
+.logout-button {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 10px 14px;
+  color: var(--text-soft);
+  background: rgba(255,255,255,.04);
+  cursor: pointer;
+}
+.logout-button:hover { color: var(--text); background: rgba(255,255,255,.065); }
 @media (max-width: 720px) {
   .navbar { width: min(100% - 24px, 1180px); grid-template-columns: 1fr auto; border-radius: 24px; }
   .nav-links { grid-column: 1 / -1; justify-content: center; padding-top: 12px; }
   .brand-text { display: none; }
+  .auth-actions { grid-column: 2; }
 }
