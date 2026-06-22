@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -21,8 +22,7 @@ export class ResearchBlogEditorComponent {
   private readonly router = inject(Router);
   private readonly api = inject(ApiService);
   private readonly authService = inject(AuthService);
-
-  private postId = this.route.snapshot.paramMap.get('id');
+  private readonly postId = signal<string | null>(null);
 
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
@@ -32,7 +32,7 @@ export class ResearchBlogEditorComponent {
   protected readonly currentPost = signal<BlogPost | null>(null);
   protected readonly projects = signal<ResearchProject[]>([]);
   protected readonly isResearcher = computed(() => this.authService.isResearcher());
-  protected readonly isEditMode = computed(() => !!this.postId);
+  protected readonly isEditMode = computed(() => !!this.postId());
   protected readonly hasProjects = computed(() => this.projects().length > 0);
   protected readonly saveLabel = computed(() => (this.isEditMode() ? 'Save notebook changes' : 'Save as draft'));
   protected readonly primaryActionLabel = computed(() => (this.saving() ? 'Syncing notebook...' : this.saveLabel()));
@@ -88,7 +88,10 @@ export class ResearchBlogEditorComponent {
   });
 
   constructor() {
-    void this.initialize();
+    this.route.paramMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+      this.postId.set(params.get('id'));
+      void this.initialize();
+    });
   }
 
   protected async save() {
@@ -157,12 +160,25 @@ export class ResearchBlogEditorComponent {
 
     this.loading.set(true);
     this.errorMessage.set(null);
+    this.successMessage.set(null);
+    this.currentPost.set(null);
 
     try {
       this.projects.set(await firstValueFrom(this.api.getProjects()));
 
-      if (this.postId) {
-        this.syncForm(await firstValueFrom(this.api.getMyBlogPost(this.postId)));
+      if (this.postId()) {
+        this.syncForm(await firstValueFrom(this.api.getMyBlogPost(this.postId()!)));
+      } else {
+        this.form.reset({
+          title: '',
+          slug: '',
+          excerpt: '',
+          content_markdown: '',
+          status: 'draft',
+          visibility: 'public',
+          tags: '',
+          project_id: ''
+        });
       }
     } catch (error) {
       this.errorMessage.set(this.toMessage(error, 'Unable to load the research editor.'));
@@ -187,7 +203,7 @@ export class ResearchBlogEditorComponent {
       this.syncForm(post);
 
       if (!this.isEditMode()) {
-        this.postId = post.id;
+        this.postId.set(post.id);
         await this.router.navigate(['/research/blog', post.id, 'edit'], { replaceUrl: true });
       }
 

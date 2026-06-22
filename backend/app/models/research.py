@@ -9,6 +9,18 @@ from app.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 from app.models.enums import BlogVisibility, DatasetStatus, ExperimentStatus, PublicationStatus, ResearchStatus, TaskType
 
 
+class Profile(Base, TimestampMixin):
+    __tablename__ = "profiles"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+    )
+    email: Mapped[str | None] = mapped_column(Text, unique=True)
+    full_name: Mapped[str | None] = mapped_column(Text)
+    role: Mapped[str] = mapped_column(String(32), nullable=False)
+
+
 class ResearchProject(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "research_projects"
 

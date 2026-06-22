@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from app.api.router import api_router
 from app.core.config import get_settings
 from app.core.cors import configure_cors
+from app.core import logging as _logging  # noqa: F401
 
 settings = get_settings()
 

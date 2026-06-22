@@ -1,6 +1,8 @@
 import uuid
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import CurrentUser, get_current_user, require_research_user
@@ -36,6 +38,7 @@ from app.schemas.research import (
 from app.services.research import create_blog_post, create_research_project, prepare_blog_post_update
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 async def get_or_404(repo, session: AsyncSession, item_id: uuid.UUID):
@@ -118,7 +121,7 @@ async def list_my_posts(
     session: AsyncSession = Depends(get_db_session),
     current_user: CurrentUser = Depends(require_research_user),
 ):
-    return await blog_post_repo.list_for_author(session, current_user.id, limit, offset)
+    return await blog_post_repo.list_for_author(session, current_user.profile_id or current_user.id, limit, offset)
 
 
 @router.get("/blog-posts/mine/{post_id}", response_model=BlogPostRead)
@@ -127,7 +130,7 @@ async def get_my_post(
     session: AsyncSession = Depends(get_db_session),
     current_user: CurrentUser = Depends(require_research_user),
 ):
-    post = await blog_post_repo.get_for_author(session, post_id, current_user.id)
+    post = await blog_post_repo.get_for_author(session, post_id, current_user.profile_id or current_user.id)
     if post is None:
         raise HTTPException(status_code=404, detail="Item not found")
     return post
@@ -156,7 +159,7 @@ async def update_post(
     session: AsyncSession = Depends(get_db_session),
     current_user: CurrentUser = Depends(require_research_user),
 ):
-    item = await blog_post_repo.get_for_author(session, post_id, current_user.id)
+    item = await blog_post_repo.get_for_author(session, post_id, current_user.profile_id or current_user.id)
     if item is None:
         raise HTTPException(status_code=404, detail="Item not found")
     return await blog_post_repo.update(session, item, prepare_blog_post_update(payload, item))
@@ -168,17 +171,71 @@ async def publish_post(
     session: AsyncSession = Depends(get_db_session),
     current_user: CurrentUser = Depends(require_research_user),
 ):
-    item = await blog_post_repo.get_for_author(session, post_id, current_user.id)
-    if item is None:
-        raise HTTPException(status_code=404, detail="Item not found")
-    return await blog_post_repo.update(
-        session,
-        item,
-        prepare_blog_post_update(
-            BlogPostUpdate(status="published", visibility="public"),
-            item,
-        ),
+    profile_id = current_user.profile_id or current_user.id
+    logger.info(
+        "Publish requested: post_id=%s auth_user_id=%s profile_id=%s",
+        post_id,
+        current_user.auth_user_id,
+        profile_id,
     )
+
+    item = await blog_post_repo.get(session, post_id)
+    if item is None:
+        logger.info("Publish failed: post_id=%s not found", post_id)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Blog post not found")
+
+    logger.info(
+        "Publish lookup resolved: post_id=%s profile_id=%s post_author_id=%s status=%s visibility=%s",
+        post_id,
+        profile_id,
+        item.author_id,
+        item.status.value,
+        item.visibility.value,
+    )
+
+    if item.author_id != profile_id:
+        logger.warning(
+            "Publish forbidden: post_id=%s profile_id=%s post_author_id=%s",
+            post_id,
+            profile_id,
+            item.author_id,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to publish this blog post",
+        )
+
+    post_author_id = item.author_id
+    try:
+        updated_item = await blog_post_repo.update(
+            session,
+            item,
+            prepare_blog_post_update(
+                BlogPostUpdate(status="published", visibility="public"),
+                item,
+            ),
+        )
+    except SQLAlchemyError as exc:
+        await session.rollback()
+        logger.exception(
+            "Publish update failed: post_id=%s profile_id=%s post_author_id=%s",
+            post_id,
+            profile_id,
+            post_author_id,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to publish blog post",
+        ) from exc
+
+    logger.info(
+        "Publish succeeded: post_id=%s profile_id=%s status=%s published_at=%s",
+        post_id,
+        profile_id,
+        updated_item.status.value,
+        updated_item.published_at.isoformat() if updated_item.published_at else None,
+    )
+    return updated_item
 
 
 @router.post("/blog-posts/{post_id}/visibility", response_model=BlogPostRead)
@@ -188,7 +245,7 @@ async def set_post_visibility(
     session: AsyncSession = Depends(get_db_session),
     current_user: CurrentUser = Depends(require_research_user),
 ):
-    item = await blog_post_repo.get_for_author(session, post_id, current_user.id)
+    item = await blog_post_repo.get_for_author(session, post_id, current_user.profile_id or current_user.id)
     if item is None:
         raise HTTPException(status_code=404, detail="Item not found")
     return await blog_post_repo.update(session, item, prepare_blog_post_update(payload, item))
@@ -200,7 +257,7 @@ async def delete_post(
     session: AsyncSession = Depends(get_db_session),
     current_user: CurrentUser = Depends(require_research_user),
 ):
-    item = await blog_post_repo.get_for_author(session, post_id, current_user.id)
+    item = await blog_post_repo.get_for_author(session, post_id, current_user.profile_id or current_user.id)
     if item is None:
         raise HTTPException(status_code=404, detail="Item not found")
     await blog_post_repo.delete(session, item)

@@ -17,8 +17,10 @@ bearer_scheme = HTTPBearer(auto_error=False)
 @dataclass(slots=True)
 class CurrentUser:
     id: UUID
+    auth_user_id: UUID
     email: str | None
     role: str | None
+    profile_id: UUID | None = None
     claims: dict[str, object] = field(default_factory=dict)
 
 
@@ -57,6 +59,8 @@ async def get_current_user(
 
     return CurrentUser(
         id=parsed_user_id,
+        auth_user_id=parsed_user_id,
+        profile_id=None,
         email=str(email) if isinstance(email, str) else None,
         role=str(role) if isinstance(role, str) else None,
         claims=dict(payload),
@@ -84,7 +88,9 @@ async def require_research_user(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Research access required")
 
     return CurrentUser(
-        id=current_user.id,
+        id=UUID(str(row["id"])),
+        auth_user_id=current_user.auth_user_id,
+        profile_id=UUID(str(row["id"])),
         email=current_user.email or row["email"],
         role=row["role"],
         claims=current_user.claims,

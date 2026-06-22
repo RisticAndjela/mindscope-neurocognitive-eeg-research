@@ -23,6 +23,7 @@ def prepare_blog_post_create(payload) -> dict:
 
 
 def prepare_blog_post_update(payload, current_post: BlogPost) -> dict:
+    now = datetime.now(timezone.utc)
     data = payload.model_dump(exclude_unset=True)
 
     if "slug" in data:
@@ -31,7 +32,9 @@ def prepare_blog_post_update(payload, current_post: BlogPost) -> dict:
 
     next_status = data.get("status", current_post.status)
     if next_status == PublicationStatus.published and current_post.published_at is None:
-        data["published_at"] = datetime.now(timezone.utc)
+        data["published_at"] = now
+
+    data["updated_at"] = now
 
     return data
 
