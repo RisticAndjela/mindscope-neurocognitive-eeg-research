@@ -12,8 +12,6 @@ This backend focuses only on:
 - model runs
 - experiment metrics/results
 
-Recommended cloud database: **Supabase Postgres Free Plan**.
-
 ## Stack
 
 - Python
@@ -33,19 +31,3 @@ pip install -r requirements.txt
 cp .env.example .env
 uvicorn app.main:app --reload
 ```
-
-## Database
-
-Create a free Supabase project, copy the Postgres connection string, and put it in `.env`:
-
-```env
-DATABASE_URL=postgresql+asyncpg://postgres:<PASSWORD>@<HOST>:5432/postgres
-```
-
-Then run the SQL in:
-
-```txt
-backend/sql/001_initial_schema.sql
-```
-
-inside Supabase SQL Editor.
